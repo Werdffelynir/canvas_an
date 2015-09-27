@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="an_1.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas_Animation_An</title>
+
+
+    <link rel="stylesheet" href="http://alib.loc/grid.css">
+
+    <!--  S  T  Y  L  E  -->
+    <style>
+        html,body{
+            background-color: #212121;
+        }
+        #container{
+            display: block;
+            margin: 30px auto;
+            border: 4px solid #000;
+            background-color: #fff;
+        }
+    </style>
+
+</head>
+<body>
+
+<canvas id="container"></canvas>
+
+<!--  S  C  R  I  P  T  -->
+<script src="an_1.js"></script>
+<script>
+    var an = new An({
+        id:'container',
+        width:800,
+        height:600,
+        isClear:true,
+        isSave:true,
+        isRestore:true,
+        isSorted:true,
+        ftp:30
+    });
+
+    var boxBlue = an.shape(100,100,function(ctx){
+        ctx.fillStyle = 'rgba(36,49,113,.2)';
+        ctx.fillRect(0,0,100,100);
+    });
+    an.draw(boxBlue, 100,100);
+
+    an.frame({
+        delay: 100,
+        expire: 200,
+        x:-10,
+        dSpeed: 5.5,
+        dx: 0,
+        run:function(ctx)
+        {
+            this.dx += this.dSpeed;
+            this.x = this.dx;
+            if(this.x > an.width) {
+                this.x = -10;
+                this.dx = 2;
+            }
+            ctx.beginPath();
+            if(this.x > an.width/3){
+                ctx.shadowColor = '#1C1C28';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetX = -15;
+                ctx.shadowOffsetY = 0;
+            }else{
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+            }
+            ctx.fillStyle = '#1C1C28';
+            ctx.rect(this.x, 50, 100, 50 );
+            //ctx.arc(this.x,50,20,0,Math.PI*2);
+            ctx.fill();
+            ctx.closePath();
+            
+            an.clearShadow();
+            //an.draw(boxBlue);
+        }
+    });
+
+/*
+    an.frame({
+        run:function(ctx)
+        {
+            if(an.frameCurrent < 200) return;
+            //ctx.transform(1,0,0,1,0,0);
+            ctx.fillStyle = '#1C1C28';
+            ctx.fillRect(100, 50, 50, 100);
+        }
+    });
+*/
+
+    
+    
+    
+    
+    an.frame({
+        name: 'display_ftp',
+        deep: 1000,
+        timeLast:0,
+        frame:0,
+        run:function(ctx){
+            this.frame ++;
+            var timeNow = (new Date).getTime();
+            var ftp = (timeNow - this.timeLast)/1000;
+            this.timeLast = timeNow;
+            ctx.fillStyle = '#000';
+            ctx.font = "14px/14px Arial";
+            ctx.fillText("Frame: " + this.frame + "  FTP: " + parseInt(1/ftp), 10, 20);
+        }
+    });
+    
+    an.render();
+
+</script>
+
+</body>
+</html>

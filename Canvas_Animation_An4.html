@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas_Animation_An</title>
+    
+    
+    <link rel="stylesheet" href="http://alib.loc/grid.css">
+    
+    <!--  S  T  Y  L  E  -->
+    <style>
+        html,body{
+            background-color: #212121;
+        }
+        #container{
+            display: block;
+            margin: 30px auto;
+            border: 4px solid #000;
+            background-color: #fff;
+        }
+    
+    
+    </style>
+    
+</head>
+<body>
+    
+<canvas id="container" width="600" height="400"></canvas>
+    
+<!--  S  C  R  I  P  T  -->
+<script>
+    
+    var canvas = document.getElementById('container');
+    canvas.width = 600;
+    canvas.height = 400;
+    var mainContext = canvas.getContext('2d');
+    
+    
+    function An(obj)
+    {
+        if(!(this instanceof An)) return new An(opt);
+        if(!(typeof obj == 'object') || !obj.ctx) return null;
+        
+        var ctxOri = obj.ctx || null;
+        var canvas = document.createElement('canvas');
+            canvas.width = ctxOri.canvas.width;
+            canvas.height = ctxOri.canvas.height;
+        var ctx = canvas.getContext('2d');
+        
+        var tm; 
+        var an = {};
+        
+        an.width = canvas.width;
+        an.height = canvas.height;
+        an.ftp = obj.ftp || false;
+        an.global = {};
+        an.isClear = obj.isClear || true;
+        an.isSave = obj.isSave || false;
+        an.isRestore = obj.isRestore || false;
+        an.isSorted = obj.isSorted || true;
+        an.drawStack = [];
+        
+        an.render = function(){
+            if(an.ftp) tm = setInterval(an.update ,1000/an.ftp);
+            else an.update();
+        };
+         /*
+        an.draw = function(obj){
+            this.drawStack.push(obj);
+        };*/
+        
+        an.shape = function(func, width, height){
+            var c = document.createElement('canvas');
+                c.width = width || 100; 
+                c.height = height || 100;
+            var _ctx = c.getContext("2d");
+            func.call(func, _ctx);
+            return _ctx.canvas;
+        };
+        
+        an.draw = function(source, x, y, dWidth, dHeight){
+            x = x || 0; 
+            y = y || 0;
+            dWidth = dWidth || source.width;
+            dHeight = dHeight || source.height;
+            
+            an.frame({run:function(ctx){
+                ctx.drawImage(source, x, y, dWidth, dHeight);
+            }});
+        };
+        
+        an.clear = function(){
+            ctx.clearRect(0,0,an.width,an.height);
+            ctxOri.clearRect(0,0,an.width,an.height);
+        };
+        
+        an.frames = [];
+        an.frame = function(f){
+            if(an.frameByName(f.name) === false){
+                frame = an.mergeSceneProperty(f);
+                an.frames.push(frame);
+                return frame;
+            }
+            return false;
+        };
+        an.mergeSceneProperty = function(prop){
+            var dp = {deep:100,visibly:true,name:'farme_'+an.frames.length};
+            for(var key in dp){
+                if(prop[key] === undefined) prop[key] = dp[key];
+            }
+            return prop;
+        };
+        an.frameByName = function (name){
+            for(var i=0; i<an.frames.length; i++){
+                if(an.frames[i].name !== undefined && an.frames[i].name === name) {
+                    return an.frames[i];
+                }
+            }
+            return false;
+        };
+        an.sortByDeeps = function(){
+            an.frames.sort(function(a, b){
+                return (a.deep > b.deep) ? 1 : -1;
+            });
+        };
+        an.update = function(){
+            if(an.isClear) an.clear();
+            if(an.isSorted) an.sortByDeeps();
+            for(var i=0; i<an.frames.length; i++){
+                if(typeof an.frames[i].run == 'function'){
+                    if(an.isSave) ctx.save();
+                    an.frames[i].run.call(an.frames[i], ctx);
+                    if(an.isRestore) ctx.restore();
+                }
+            }
+            
+            ctxOri.drawImage(ctx.canvas, 0, 0);
+        };
+        
+        return an;
+    }
+    
+    
+    
+    An.u = An.Util = {
+    
+        cloneObject: function (obj) {
+            if (obj === null || typeof obj !== 'object') return obj;
+            var temp = obj.constructor(); // give temp the original obj's constructor
+            for (var key in obj)
+                temp[key] = Pain.Util.cloneObject(obj[key]);
+            return temp;
+        },
+
+        randomColor: function () {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        },
+
+        rand: function(min,max){
+            return Math.floor(Math.random() * max) + min;
+        },
+    
+        randomNumber: function(min,max){
+            min = min||0;
+            max = max||100;
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        },
+
+        degreesToRadians: function(deg){
+            return (deg * Math.PI) / 180;
+        },
+
+        radiansToDegrees: function(rad){
+            return (rad * 180) / Math.PI;
+        }
+
+    };
+
+    
+    
+    var an = new An({
+        ctx:mainContext,
+        ftp:24,
+        isSave:true,
+        isRestore:true,
+    });
+    
+    
+    var rec1Data = {
+        r:0
+    };
+    var rec1 = an.shape(function(ctx){
+        ctx.translate(50,50);
+        //ctx.rotate(An.Util.degreesToRadians(45));
+        ctx.fillRect(-25,-25, 50,50);
+    }, 100, 100);
+    
+    //console.log(rec1);
+    
+    
+    an.draw(rec1, 0, 0);
+    
+    an.frame({
+        name: 'obj 1', 
+        deep:3,
+        sY:0,
+        dY:5,
+        run: function(ctx){
+            
+            this.sY += this.dY;
+            
+            if(this.sY > 360){
+                this.sY = 360; 
+                this.dY = this.dY * -1;
+            }else if(this.sY < 0){
+                this.dY = this.dY * -1;
+                this.sY = 0;
+            }     
+                    
+            var radY = (An.Util.degreesToRadians(this.sY) * 0.2);
+            
+            
+            ctx.moveTo(0, an.height/2);
+            ctx.lineTo(an.width, an.height/2);
+            ctx.moveTo(an.width/2, 0);
+            ctx.lineTo(an.width/2, an.height);
+            ctx.stroke();
+            
+            /*console.log(this);
+            ctx.translate(0,200);
+            ctx.beginPath();
+            ctx.fillStyle = '#B34EE9';
+            ctx.arc(100, Math.sin(radY) * 100, 50, 0, Math.PI * 2, false);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.fillStyle = '#E91700';
+            ctx.arc(200, 0, Math.cos(radY) * 20, 0, Math.PI * 2, false);
+            ctx.fill();
+            ctx.restore();
+            */
+            rec1.x ++;
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.translate(300, 200);
+            ctx.fillStyle = '#52E95F';
+            var sw = Math.sin(radY) * 30;
+            var sh = Math.sin(radY) * 30;
+            ctx.fillRect(-((sw+50)/2), -(sh+50)/2, 50 + sw, 50 + sh);
+            ctx.restore();
+            
+        }
+    });
+    
+    
+    
+    
+    an.render();
+    
+</script>
+    
+</body>
+</html>

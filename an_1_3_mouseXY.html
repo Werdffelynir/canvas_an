@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="an_1.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas_Animation_An</title>
+
+
+    <link rel="stylesheet" href="http://alib.loc/grid.css">
+
+    <!--  S  T  Y  L  E  -->
+    <style>
+        html,body{
+            background-color: #212121;
+        }
+        #container{
+            display: block;
+            margin: 30px auto;
+            border: 4px solid #000;
+            background-color: #fff;
+        }
+    </style>
+
+</head>
+<body>
+
+<canvas id="container"></canvas>
+
+<!--  S  C  R  I  P  T  -->
+<script src="an_1.js"></script>
+<script>
+    var an = new An({
+        id:'container',
+        width:800,
+        height:600,
+        isClear:true,
+        isSave:true,
+        isRestore:true,
+        isSorted:true,
+        ftp:30
+    });
+
+    an.frame({
+        name: 'display_mouse_position',
+        deep: 1000,
+        mouseX: 0,
+        mouseY: 0,
+        run:function(ctx){
+            var self = this;
+            an.canvas.onmousemove = function(event){
+                var mp = An.u.getCoordinates(event, an.canvas);
+                self.mouseX = mp.x;
+                self.mouseY = mp.y;
+            };
+
+            ctx.strokeStyle = '#000000';
+            ctx.font = "14px/14px Arial";
+            ctx.fillText('Mouse x: ' + this.mouseX + ' y:' + this.mouseY, 250, 20);
+        }
+    });
+
+    an.frame({
+        name: 'display_ftp',
+        deep: 1000,
+        timeLast:0,
+        frame:0,
+        run:function(ctx){
+            this.frame ++;
+            var timeNow = (new Date).getTime();
+            var ftp = (timeNow - this.timeLast)/1000;
+            this.timeLast = timeNow;
+            ctx.fillStyle = '#000';
+            ctx.font = "14px/14px Arial";
+            ctx.fillText("Frame: " + this.frame + "  FTP: " + parseInt(1/ftp), 10, 20);
+        }
+    });
+    
+    an.render();
+
+</script>
+
+</body>
+</html>

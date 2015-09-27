@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas_</title>
+    
+    
+    <link rel="stylesheet" href="http://alib.loc/grid.css">
+    
+    <script src="konva.js"></script>
+    
+    <!--  S  T  Y  L  E  -->
+    <style>
+        html,body{
+            background-color: #212121;
+        }
+        #container{
+            display: block;
+            margin: 30px auto;
+            border: 4px solid #000;
+            background-color: #fff;
+        }
+    
+    
+    </style>
+    
+</head>
+<body>
+    
+<canvas id="container" width="600" height="400"></canvas>
+    
+<!--  S  C  R  I  P  T  -->
+<script>
+    
+    var canvas = document.getElementById('container');
+    canvas.width = 600;
+    canvas.height = 400;
+    var ctx = canvas.getContext('2d');
+    
+    
+    function An(obj)
+    {
+        if(!(this instanceof An)) return new An(opt);
+        if(!(typeof obj == 'object') || !obj.ctx) return null;
+        
+        
+        /*
+        // OPTIONS
+        var opt = obj; delete obj;
+        var ctxMain = obj.ctx || null;
+        var canvas = document.createElement('canvas');
+            canvas.width = ctxMain.width;
+            canvas.height = ctxMain.height;
+        var ctx = canvas.getContext('2d');
+        var ftp = obj.ftp || false;
+        var frames = [];
+        
+        this.init = function(){
+            return this;
+        };
+        
+        this.animate = function(){};
+        
+        this.frame = function(obj){
+            frames.push(obj);
+        };
+        
+        this.object = function(){};
+        
+        
+        var update = function(){
+            
+            
+            for(var i=0; i<frames.length; i++){
+                if(typeof frames[i].run == 'function'){
+                    ctx.save();
+                    ctx.beginPath();
+                    frames[i].run.call(this, ctx);
+                }
+            }
+            
+        };
+        
+        var timeOut = null;
+        
+        this.run = function(){
+            //console.log(frames);
+            
+            if(ftp) timeOut = setTimeout(update, 1000/ftp);
+            else update();
+            
+        };*/
+        ;
+        var ctxOri = obj.ctx || null;
+        var canvas = document.createElement('canvas');
+            canvas.width = ctxOri.canvas.width;
+            canvas.height = ctxOri.canvas.height;
+        var ctx = canvas.getContext('2d');
+        
+        //console.log(ctxOri.canvas.width);
+        
+        var tm; 
+        var an = {};
+        an.width = canvas.width;
+        an.height = canvas.height;
+        an.ftp = obj.ftp || false;
+        an.global = {};
+        an.globalClear = obj.clear || true;
+        an.globalSave = obj.save || false;
+        an.globalRestore = obj.restore || false;
+        an.run = function(){
+            if(an.ftp) tm = setInterval(an.update ,1000/an.ftp);
+            else an.update();
+        };
+        an.drawStack = [];
+        an.draw = function(obj){
+            this.drawStack.push(obj);
+        };
+        an.clear = function(){
+            ctx.clearRect(0,0,an.width,an.height);
+            ctxOri.clearRect(0,0,an.width,an.height);
+        };
+        an.update = function(){
+            
+            if(an.globalClear) an.clear();
+            if(an.globalSave) an.save();
+            
+            //ctx.clearRect(0,0,an.width,an.height);
+            //ctxOri.clearRect(0,0,an.width,an.height);
+            for(var i=0; i<an.drawStack.length; i++){
+                if(typeof an.drawStack[i].run == 'function'){
+                    an.drawStack[i].run.call(an.drawStack[i], ctx);
+                }
+            }
+            
+            if(an.globalRestore) an.restore();
+            
+            ctxOri.drawImage(ctx.canvas, 0, 0);
+        };
+        return an;
+    }
+
+
+    
+    
+    
+    var an = new An({
+        ctx:ctx,
+        ftp:60,
+    });
+
+    
+    
+    for(var i = 0; i<2000; i++){
+        
+        var x = randNum(0, 600);
+        var y = randNum(0, 400);
+        var vx = randNum(1, 10);
+        var vy = randNum(1, 10);
+        var color = 'rgba(0,0,0,.2)'; //randColor();
+        
+        an.draw({
+            x: x,
+            y: y,
+            vx: vx,
+            vy: vy,
+            color: color,
+            run:function(ctx){
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+                
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if(this.x > an.width && this.x ) this.vx = -this.vx;
+                else if(this.x < 0) this.vx = this.vx * -1;
+                
+                if(this.y > an.height ) this.vy = -this.vy;
+                else if(this.y < 0) this.vy = this.vy * -1;
+            }
+        });
+    }
+
+    
+    
+
+    
+    an.draw({
+        timeLast:0,
+        frame:0,
+        run:function(ctx){
+            this.frame ++;
+            
+            var timeNow = (new Date).getTime();
+            var ftp = (timeNow - this.timeLast)/1000;
+            this.timeLast = timeNow;
+            
+            ctx.fillStyle = '#000';
+            ctx.font = "14px/14px Arial";
+            ctx.fillText("Frame: " + this.frame + "  FTP: " + parseInt(1/ftp), 10, 20);
+        }
+    });
+    
+    
+    
+    //console.log(an);
+    //console.log(this);
+    //console.log(ctx);
+
+
+    
+    /*an.draw({
+        x:100,
+        run:function(ctx){
+            this.x++;
+            console.log(this.x);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(this.x,50,100,100);
+        }
+        
+    });    
+    an.draw({
+        run:function(ctx){
+            ctx.fillStyle = 'green';
+            ctx.fillRect(200,100,100,100);
+        }
+    });
+    
+    an.draw({
+        x: 0,
+        y: 0,
+        vx: 4,
+        vy: 5,
+        run:function(ctx){
+			ctx.beginPath();
+			ctx.arc(this.x, this.y, 20, 0, Math.PI * 2, false);
+			ctx.fill();
+			this.x += this.vx;
+			this.y += this.vy;
+			if(this.x > an.width && this.x ) this.vx = -this.vx;
+			else if(this.x < 0) this.vx = this.vx * -1;
+			if(this.y > an.height ) this.vy = -this.vy;
+			else if(this.y < 0) this.vy = this.vy * -1;
+        }
+    });
+    */
+    
+    
+    
+    
+    an.run();
+    //console.log(ctx);
+    
+    function randNum(min,max){
+        return Math.floor(Math.random() * max) + min;
+    }
+    function randColor(){
+        /*return "#"+((1<<24)*Math.random()|0).toString(16);*/
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+    
+</script>
+    
+</body>
+</html>
